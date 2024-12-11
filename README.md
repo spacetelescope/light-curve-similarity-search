@@ -15,18 +15,18 @@ The similarity search will rely on a vector database that is lightweight and rap
 - `mastDownload`: the test set light curves
 - `wavelets`: the wavelet power spectra of the light curves (used as CNN input)
 - `model.py`: the python code containing the CNN model
-- [`1-read-and-transform-lightcurves.ipynb`][## Read and Transform Light Curves]
-- [`2-train-and-evaluate-cnn.ipynb`][## Train and Evaluate CNN]
-- [`3-check-cnn-performance.ipynb`][## Check CNN Performance]
-- [`3.5-download-test-lightcurves.ipynb`][## Download Test Light Curves]
-- [`4-lightcurve-similarity.ipynb`][## Light Curve Similarity]
+- [`1-read-and-transform-lightcurves.ipynb`](#transform)
+- [`2-train-and-evaluate-cnn.ipynb`](#train)
+- [`3-check-cnn-performance.ipynb`](#performance)
+- [`3.5-download-test-lightcurves.ipynb`](#download)
+- [`4-lightcurve-similarity.ipynb`](#similarity)
 
-## Read and Transform Light Curves
+## Read and Transform Light Curves <a name="transform"></a>
 
-## Train and Evaluate CNN
+## Train and Evaluate CNN <a name="train"></a>
 
-## Check CNN Performance
+## Check CNN Performance <a name="performance"></a>
 
-## Download Test Light Curves
+## Download Test Light Curves <a name="download"></a>
 
-## Light Curve Similarity
+## Light Curve Similarity <a name="similarity"></a>
