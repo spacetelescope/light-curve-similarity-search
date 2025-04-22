@@ -1,8 +1,7 @@
 from astropy.io import ascii
 
 
-# catalog_url = "https://content.cld.iop.org/journals/0067-0049/263/1/14/revision2/apjsac9125t1_mrt.txt"
-catalog_url = "apjsac9125t1_mrt.txt" # MRT has a bad character, so source from the local version for now.
+catalog_url = "https://content.cld.iop.org/journals/0067-0049/263/1/14/revision3/apjsac9125t1_mrt.txt"
     
 
 def read(save=False):
