@@ -188,14 +188,71 @@ def process(catname, load=False):
     else:
         # Read the catalog
         cat = read_catalog(f"catalogs/{catname}.csv")
-
+            
         # Get light curve URIs
         uris = query_observations(cat, uris_path=f"catalogs/{catname}-uris.txt")
 
     # Process light curves into wavelet power spectra and save
+    os.makedirs(f"wavelets/{catname}", exist_ok=True)
     lazy_results = []
     for uri in uris:
         lazy_result = dask.delayed(process_one)(uri, catname)
         lazy_results.append(lazy_result)
     
     dask.compute(*lazy_results)
+
+
+def main(catalog, log_level='DEBUG', load=False):
+    logging.info(f"Processing '{catalog}' with log level '{log_level}' and load mode '{load}'.")
+    process(catalog, load=load)
+
+
+if __name__ == "__main__":
+    import argparse
+
+    # Create an argument parser
+    parser = argparse.ArgumentParser(description='Set logging level from command line')
+
+    # Add an argument for log level
+    parser.add_argument(
+        '-l', '--log',
+        dest='log_level',
+        default='WARNING',
+        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+        type=str.upper,
+        help='Set the logging level',
+    )
+
+    # Add argument for catalog name
+    parser.add_argument(
+        '-c', '--catalog',
+        dest='catalog',
+        default=None,
+        choices=['tess-ebs', 'tess-exo', 'tess-rot', 'tess-flares', 'tess-dip', 'tess-seis', 'tess-sne'],
+        type=str.lower,
+        help='Name of the catalog to process',
+    )
+
+    # Add argument for load mode
+    parser.add_argument(
+        '-u', '--load-uris',
+        dest='load',
+        action='store_true',
+        help='Whether to load the URIs from file',
+    )
+
+    # Parse the arguments
+    args = parser.parse_args()
+
+    # Get the log level from arguments
+    log_level = args.log_level
+    catalog = args.catalog
+    load = args.load
+
+    # Set up logger
+    numeric_level = getattr(logging, log_level.upper(), None)
+    if not isinstance(numeric_level, int):
+        raise ValueError('Invalid log level: %s' % log_level)
+    logging.basicConfig(level=numeric_level, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+
+    main(catalog, log_level, load)
