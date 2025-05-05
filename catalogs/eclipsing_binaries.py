@@ -33,41 +33,6 @@ def read(save_path=None):
     return ebs
 
 
-def process_one(uri, catname):
-    """Process a single light curve.
-    """
-    logging.warning(f"Processing {uri}.")
-    outname = os.path.basename(uri).replace("lc.fits", "wt")
-
-    core.lc_to_wps(uri,
-        lc_kw=dict(flux_column="sap_flux", quality_bitmask="hard"),
-        wp_kw=dict(minimum_period=0.01, maximum_period=12, output_size=64),
-        save_path=f"wavelets/{catname}/{outname}.npy",
-    )
-
-
-def process(catname, load=False):
-    """Process the light curves from the catalog.
-    """
-
-    if load:
-        uris = np.loadtxt(f"catalogs/{catname}-uris.txt", dtype=str)
-    else:
-        # Read the catalog
-        cat = core.read_catalog(f"catalogs/{catname}.csv")
-
-        # Get light curve URIs
-        uris = core.query_observations(cat, uris_path=f"catalogs/{catname}-uris.txt")
-
-    # Process light curves into wavelet power spectra and save
-    lazy_results = []
-    for uri in uris:
-        lazy_result = dask.delayed(process_one)(uri, catname)
-        lazy_results.append(lazy_result)
-    
-    dask.compute(*lazy_results)
-
-
 if __name__ == "__main__":
     import argparse
 
@@ -97,5 +62,4 @@ if __name__ == "__main__":
     logging.basicConfig(level=numeric_level, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
 
     catname = "tess-ebs"
-    #read(save_path=f"catalogs/{catname}.csv")
-    process(catname, load=True)
+    core.process(catname, load=True)

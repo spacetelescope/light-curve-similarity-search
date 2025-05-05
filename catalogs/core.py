@@ -8,6 +8,7 @@ from scipy import signal # scipy<1.15
 import torch
 import s3fs
 import lightkurve # lightkurve>=2.5
+import dask
 
 
 Observations.enable_cloud_dataset() # use cloud data when possible
@@ -163,3 +164,38 @@ def lc_to_wps(uri, lc_kw=None, wp_kw=None, save_path=None):
         np.save(save_path, power)
 
     return power
+
+
+def process_one(uri, catname):
+    """Process a single light curve.
+    """
+    logging.warning(f"Processing {uri}.")
+    outname = os.path.basename(uri).replace("lc.fits", "wt")
+
+    lc_to_wps(uri,
+        lc_kw=dict(flux_column="sap_flux", quality_bitmask="hard"),
+        wp_kw=dict(minimum_period=0.01, maximum_period=12, output_size=64),
+        save_path=f"wavelets/{catname}/{outname}.npy",
+    )
+
+
+def process(catname, load=False):
+    """Process the light curves from the catalog.
+    """
+
+    if load:
+        uris = np.loadtxt(f"catalogs/{catname}-uris.txt", dtype=str)
+    else:
+        # Read the catalog
+        cat = read_catalog(f"catalogs/{catname}.csv")
+
+        # Get light curve URIs
+        uris = query_observations(cat, uris_path=f"catalogs/{catname}-uris.txt")
+
+    # Process light curves into wavelet power spectra and save
+    lazy_results = []
+    for uri in uris:
+        lazy_result = dask.delayed(process_one)(uri, catname)
+        lazy_results.append(lazy_result)
+    
+    dask.compute(*lazy_results)
